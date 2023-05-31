@@ -1,0 +1,22 @@
+<div
+  [style.background-color]="card.color"
+  [style.transform]="currentTranslate"
+  [style.zIndex]="card.index"
+  class="card-wrapper"
+>
+  <div class="card-title">
+    <span class="card-title-text">
+      {{ card.title }}
+    </span>
+    <span class="card-price">
+      {{ card.price }}
+    </span>
+  </div>
+  <div class="card-content">
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum et mollitia
+      animi sit aperiam vero cupiditate libero doloribus numquam, quis quos,
+      laboriosam a officiis porro in atque cumque sequi odit!
+    </p>
+  </div>
+</div>

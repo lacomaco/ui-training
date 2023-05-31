@@ -1,0 +1,6 @@
+<app-iphone-xr>
+  <div dragObserve (dragObserve)="test($event)">
+    <app-wallet-card *ngFor="let card of cards" [card]="card">
+    </app-wallet-card>
+  </div>
+</app-iphone-xr>
