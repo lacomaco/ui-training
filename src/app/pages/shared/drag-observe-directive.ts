@@ -6,11 +6,18 @@ import {
   Output,
 } from '@angular/core';
 
+export enum DragEvent {
+  DOWN,
+  MOVE,
+  UP,
+}
+
 export interface DragInfo {
   x: number;
   y: number;
   isUp: boolean;
   isRight: boolean;
+  event: DragEvent;
 }
 
 @Directive({
@@ -40,7 +47,13 @@ export class DragObserveDirective {
     const isUp = this.prevY < event.clientY;
     const isRight = this.prevX < event.clientX;
 
-    this.dragObserve.next({ x: movedX, y: movedY, isUp, isRight });
+    this.dragObserve.next({
+      x: movedX,
+      y: movedY,
+      isUp,
+      isRight,
+      event: DragEvent.MOVE,
+    });
   }
 
   @HostListener('mousedown', ['$event'])
@@ -52,10 +65,16 @@ export class DragObserveDirective {
     this.prevY = event.clientY;
   }
 
-  @HostListener('mouseup', ['$event'])
-  onMouseUp(event: MouseEvent) {
+  @HostListener('mouseup')
+  onMouseUp() {
     this.reset();
-    this.dragObserve.next({ x: 0, y: 0, isUp: false, isRight: false });
+    this.dragObserve.next({
+      x: 0,
+      y: 0,
+      isUp: false,
+      isRight: false,
+      event: DragEvent.UP,
+    });
   }
 
   @HostListener('mouseleave')

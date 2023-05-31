@@ -1,6 +1,8 @@
 import { Component, Signal, computed, signal } from '@angular/core';
 import { CardBodyHeight, Wallet } from '../wallet-card/wallet-card.component';
-import { DragInfo } from '../../shared/drag-observe-directive';
+import { DragEvent, DragInfo } from '../../shared/drag-observe-directive';
+import { interpolation } from '../../utils/interpolation';
+import { Bezier } from 'bezier-js';
 
 @Component({
   selector: 'app-wallet-animations-home',
@@ -52,6 +54,8 @@ export class WalletAnimationsHomeComponent {
   clickedCardIndex = signal(this.cardData.length - 1);
   minimumGap = 5;
 
+  cardBezier = new Bezier([0.28, 0.09, 0.31, 0.93]);
+
   cards: Signal<Wallet[]> = computed(() => {
     const currentSelectedCard = this.clickedCardIndex();
     const movedY = this.movingPosition();
@@ -67,6 +71,8 @@ export class WalletAnimationsHomeComponent {
     });
   });
 
+  private isResetAnimationRun = false;
+
   private cardMove(movedY: number, selectedIndex: number): number[] {
     let resource = movedY;
 
@@ -81,22 +87,58 @@ export class WalletAnimationsHomeComponent {
         return defaultPosition + movedY;
       }
 
-      return defaultPosition;
+      const currentT = index / this.cardData.length;
+
+      const moveY = interpolation(0, movedY, currentT);
+
+      return defaultPosition + moveY;
     });
   }
 
   isCardMove(e: DragInfo): void {
-    this.movingPosition.set(e.y);
-    this.isUp.set(e.isUp);
+    if (e.event === DragEvent.MOVE) {
+      this.movingPosition.set(e.y);
+      this.isUp.set(e.isUp);
+    }
   }
 
   cardClick(index: number): void {
-    console.log('click here');
-
     this.clickedCardIndex.set(index);
   }
 
   resetClickedCardIndex(): void {
-    this.clickedCardIndex.set(this.cardData.length - 1);
+    if (this.isResetAnimationRun) {
+      return;
+    }
+
+    requestAnimationFrame(this.resetAnimation.bind(this));
+  }
+
+  resetAnimation(startTimeStamp: DOMHighResTimeStamp): void {
+    const start = startTimeStamp;
+    this.isResetAnimationRun = true;
+    const currentPosition = this.movingPosition();
+
+    const runAnimation = (timestamp: DOMHighResTimeStamp) => {
+      const progress = (timestamp - start) / 200;
+      const bezierY = this.cardBezier.get(progress).y;
+
+      console.log(
+        `progress: ${progress}, bezierY: ${bezierY},currentPosition:${currentPosition}`
+      );
+
+      if (progress < 1) {
+        this.movingPosition.set(currentPosition - bezierY * currentPosition);
+        this.clickedCardIndex.set(this.cardData.length - 1);
+
+        requestAnimationFrame(runAnimation.bind(this));
+        return;
+      }
+
+      this.movingPosition.set(0);
+      this.isResetAnimationRun = false;
+    };
+
+    requestAnimationFrame(runAnimation.bind(this));
   }
 }
