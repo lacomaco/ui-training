@@ -2,6 +2,8 @@
   [style.background-color]="card.color"
   [style.transform]="currentTranslate"
   [style.zIndex]="card.index"
+  (mousedown)="clickCard.next(card.index)"
+  (mouseup)="mouseUp.next(true);"
   class="card-wrapper"
 >
   <div class="card-title">

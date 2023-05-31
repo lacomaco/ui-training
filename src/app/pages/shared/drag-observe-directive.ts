@@ -6,6 +6,13 @@ import {
   Output,
 } from '@angular/core';
 
+export interface DragInfo {
+  x: number;
+  y: number;
+  isUp: boolean;
+  isRight: boolean;
+}
+
 @Directive({
   selector: '[dragObserve]',
 })
@@ -13,65 +20,54 @@ export class DragObserveDirective {
   private startX: number = 0;
   private startY: number = 0;
 
+  private prevX: number = 0;
+  private prevY: number = 0;
+
   private isDragging = false;
 
   @Output()
-  dragObserve = new EventEmitter<{ x: number; y: number }>();
+  dragObserve = new EventEmitter<DragInfo>();
 
   constructor() {}
 
   @HostListener('mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
-    event.stopPropagation();
-
-    const hostElement = this.getHostElement(event);
-
-    if (!hostElement) {
-      return;
-    }
-
     if (!this.isDragging) return;
 
     const movedX = event.clientX - this.startX;
     const movedY = event.clientY - this.startY;
 
-    this.dragObserve.next({ x: movedX, y: movedY });
+    const isUp = this.prevY < event.clientY;
+    const isRight = this.prevX < event.clientX;
+
+    this.dragObserve.next({ x: movedX, y: movedY, isUp, isRight });
   }
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent) {
-    const hostElement = this.getHostElement(event);
-    if (!hostElement) {
-      return;
-    }
-
     this.isDragging = true;
     this.startX = event.clientX;
     this.startY = event.clientY;
+    this.prevX = event.clientX;
+    this.prevY = event.clientY;
   }
 
   @HostListener('mouseup', ['$event'])
   onMouseUp(event: MouseEvent) {
-    event.stopPropagation();
-
-    if (!this.getHostElement(event)) {
-      return;
-    }
-
-    this.isDragging = false;
-
-    this.startX = -1;
-    this.startY = -1;
+    this.reset();
+    this.dragObserve.next({ x: 0, y: 0, isUp: false, isRight: false });
   }
 
-  @HostListener('mouseleave', ['$event'])
-  onMouseLeave(event: MouseEvent) {
-    this.isDragging = false;
-    this.startX = -1;
-    this.startY = -1;
+  @HostListener('mouseleave')
+  onMouseLeave() {
+    this.reset();
   }
 
-  getHostElement(e: MouseEvent): undefined | null | Element {
-    return (e.target as Element).closest('[dragobserve]');
+  private reset(): void {
+    this.isDragging = false;
+    this.startX = 0;
+    this.startY = 0;
+    this.prevX = 0;
+    this.prevY = 0;
   }
 }

@@ -1,9 +1,6 @@
-import { Component, signal } from '@angular/core';
-import {
-  CardBodyHeight,
-  CardTitleHeight,
-  Wallet,
-} from '../wallet-card/wallet-card.component';
+import { Component, Signal, computed, signal } from '@angular/core';
+import { CardBodyHeight, Wallet } from '../wallet-card/wallet-card.component';
+import { DragInfo } from '../../shared/drag-observe-directive';
 
 @Component({
   selector: 'app-wallet-animations-home',
@@ -49,20 +46,57 @@ export class WalletAnimationsHomeComponent {
     },
   ];
 
-  isClick = signal(false);
+  movingPosition = signal(0);
+  isUp = signal(false);
+
+  clickedCardIndex = signal(this.cardData.length - 1);
   minimumGap = 5;
 
-  cards: Wallet[] = this.cardData.map((card, index) => {
-    const defaultPosition = -index * CardBodyHeight;
-    return {
-      ...card,
-      defaultPosition: -index * CardBodyHeight,
-      yPosition: -index * CardBodyHeight,
-      index,
-    };
+  cards: Signal<Wallet[]> = computed(() => {
+    const currentSelectedCard = this.clickedCardIndex();
+    const movedY = this.movingPosition();
+
+    const cardMoveData = this.cardMove(movedY, currentSelectedCard);
+
+    return cardMoveData.map((yPosition, index) => {
+      return {
+        ...this.cardData[index],
+        yPosition,
+        index,
+      };
+    });
   });
 
-  test(e: any) {
-    console.log(e);
+  private cardMove(movedY: number, selectedIndex: number): number[] {
+    let resource = movedY;
+
+    return this.cardData.map((_, index) => {
+      const defaultPosition = -index * CardBodyHeight;
+
+      if (index === 0) {
+        return 0;
+      }
+
+      if (index >= selectedIndex) {
+        return defaultPosition + movedY;
+      }
+
+      return defaultPosition;
+    });
+  }
+
+  isCardMove(e: DragInfo): void {
+    this.movingPosition.set(e.y);
+    this.isUp.set(e.isUp);
+  }
+
+  cardClick(index: number): void {
+    console.log('click here');
+
+    this.clickedCardIndex.set(index);
+  }
+
+  resetClickedCardIndex(): void {
+    this.clickedCardIndex.set(this.cardData.length - 1);
   }
 }

@@ -1,10 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 export interface Wallet {
   color: string;
   title: string;
   price: string;
-  defaultPosition: number;
   yPosition: number;
   index: number;
 }
@@ -22,6 +21,12 @@ export class WalletCardComponent {
     required: true,
   })
   card!: Wallet;
+
+  @Output()
+  clickCard = new EventEmitter<number>();
+
+  @Output()
+  mouseUp = new EventEmitter<boolean>();
 
   get currentTranslate(): string {
     return `translateY(${this.card.yPosition}px)`;

@@ -1,6 +1,12 @@
 <app-iphone-xr>
-  <div dragObserve (dragObserve)="test($event)">
-    <app-wallet-card *ngFor="let card of cards" [card]="card">
+  <div dragObserve (dragObserve)="isCardMove($event)">
+    <app-wallet-card
+      clickOutside
+      *ngFor="let card of cards()"
+      [card]="card"
+      (clickCard)="cardClick($event)"
+      (mouseup)="resetClickedCardIndex()"
+    >
     </app-wallet-card>
   </div>
 </app-iphone-xr>
