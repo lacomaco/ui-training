@@ -123,10 +123,6 @@ export class WalletAnimationsHomeComponent {
       const progress = (timestamp - start) / 200;
       const bezierY = this.cardBezier.get(progress).y;
 
-      console.log(
-        `progress: ${progress}, bezierY: ${bezierY},currentPosition:${currentPosition}`
-      );
-
       if (progress < 1) {
         this.movingPosition.set(currentPosition - bezierY * currentPosition);
         this.clickedCardIndex.set(this.cardData.length - 1);

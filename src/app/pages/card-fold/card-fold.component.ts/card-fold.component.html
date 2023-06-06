@@ -1,0 +1,27 @@
+<div class="image-wrapper">
+  <div
+    [ngStyle]="{
+      transform: css()
+    }"
+    class="imgOriginal top"
+    #sampleImage
+  ></div>
+
+  <div
+    [ngStyle]="{
+      transform: css2()
+    }"
+    class="imgOriginal bottom"
+  ></div>
+
+  <!--
+  <img
+    [ngStyle]="{
+  'transform': css2(),
+}"
+    class="imgOriginal bottom"
+    (load)="imageLoad()"
+    src="assets/playing-cards/AS.png"
+    #sampleImage
+  />
+--></div>
